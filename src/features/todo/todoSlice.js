@@ -1,4 +1,9 @@
-import { createAsyncThunk, createEntityAdapter, createSlice } from "@reduxjs/toolkit";
+import {
+  createAsyncThunk,
+  createEntityAdapter,
+  createSlice,
+  isAnyOf,
+} from "@reduxjs/toolkit";
 import axios from "axios";
 
 export const fetchTodos = createAsyncThunk("todo/fetchTodos", async () => {
@@ -61,6 +66,50 @@ export const initialState = todoAdapter.getInitialState({
 const todoSlice = createSlice({
   name: "todo",
   initialState,
+  extraReducers: (builder) => {
+    builder
+      .addCase(fetchTodos.fulfilled, (state, { payload }) => {
+        state.loading = false;
+        state.error = null;
+        todoAdapter.upsertMany(state, payload);
+      })
+      .addCase(createTodo.fulfilled, (state, { payload }) => {
+        state.loading = false;
+        todoAdapter.addOne(state, payload);
+      })
+      .addCase(todoDelete.fulfilled, (state, { payload }) => {
+        state.loading = false;
+        todoAdapter.removeOne(state, payload);
+      })
+      .addCase(todoComplete.fulfilled, (state, { payload }) => {
+        state.loading = false;
+        todoAdapter.upsertOne(state, payload);
+      })
+      .addMatcher(
+        isAnyOf(
+          fetchTodos.pending,
+          createTodo.pending,
+          todoDelete.pending,
+          todoComplete.pending
+        ),
+        (state) => {
+          state.loading = true;
+          state.error = null;
+        }
+      )
+      .addMatcher(
+        isAnyOf(
+          fetchTodos.rejected,
+          createTodo.rejected,
+          todoDelete.rejected,
+          todoComplete.rejected
+        ),
+        (state, action) => {
+          state.loading = false;
+          state.error = action.error.message;
+        }
+      );
+  },
 });
 
 export default todoSlice.reducer;

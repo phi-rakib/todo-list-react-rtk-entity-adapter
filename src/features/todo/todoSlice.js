@@ -112,4 +112,6 @@ const todoSlice = createSlice({
   },
 });
 
+export const todosSelector = (state) => state.todos;
+
 export default todoSlice.reducer;

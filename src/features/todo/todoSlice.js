@@ -114,4 +114,12 @@ const todoSlice = createSlice({
 
 export const todosSelector = (state) => state.todos;
 
+export const {
+  selectById: selectTodoById,
+  selectIds: selectTodoIds,
+  selectEntities: selectTodoEntities,
+  selectAll: selectAllTodos,
+  selectTotal: selectTotalTodos,
+} = todoAdapter.getSelectors((state) => state.todos);
+
 export default todoSlice.reducer;
